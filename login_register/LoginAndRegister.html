@@ -22,7 +22,12 @@
 		}
 
 		main {
-			background: linear-gradient(to left top,rgba(71,201,241,0.5),rgba(185,172,237,0.5)),url(imgs/scenery.jpg), center/cover,no-repeat;
+			background: linear-gradient(to left top,rgba(71,201,241,0.5),rgba(185,172,237,0.5)),url(imgs/scenery.jpg), center,no-repeat;
+			background-size: cover;
+		}
+
+		.flip-modal {
+			display: none;
 		}
 
 		.modal {
@@ -75,7 +80,7 @@
 		.modal .content .input-field .iconfont {
 			position: absolute;
 			left: 10px;
-			top: 8px;
+			top: 6px;
 		}
 
 		.modal .content input[type=text],
@@ -83,7 +88,8 @@
       width: 100%;
       padding: 10px 10px 10px 28px;
       outline: none;
-      line-height: 16px;
+      /*transform(50%,50%)遇到宽高不是偶数时，结果出现小数和显示像素无法对上，缺少上边框*/
+      border: 1px solid #aaa;
     }
 
      .modal .content input[type=submit] {
@@ -94,13 +100,18 @@
       outline: none;
     }
 
-		.modal-register {
-			display: none;
-		}
-
-		.modal-login {
-			/*display: none;*/
-		}
+    .flip-modal.login .modal-login,
+    .flip-modal.register .modal-register {
+      transform: translate(-50%,-50%) rotateY(0deg);
+      backface-visibility: hidden;
+      transition: all 1s;
+    }
+    .flip-modal.login .modal-register,
+    .flip-modal.register .modal-login {
+      transform: translate(-50%,-50%) rotateY(180deg);
+      backface-visibility: hidden;
+      transition: all 1s;
+    }
 
 
 	</style>
@@ -112,7 +123,7 @@
 	<main>
 		<div class="flip-modal login">
 			<div class="modal modal-login">
-					<a href="#" class="close"><i class="iconfont icon-close"></i></a>
+					<a href="#" class="close iconfont icon-close"></a>
 					<div class="tabs">
 						<a href="#" class="login active">登录</a>
 						<a href="#" class="register">注册</a>
@@ -135,7 +146,7 @@
 					</div>
 			</div>
 			<div class="modal modal-register">
-					<a href="#" class="close"><i class="iconfont icon-close"></i></a>
+					<a href="#" class="close iconfont icon-close"></a>
 					<div class="tabs">
 						<a href="#" class="login">登录</a>
 						<a href="#" class="register active">注册</a>
@@ -153,7 +164,7 @@
 							</div>
 							<div class="input-field">
 								<i class="iconfont icon-lock"></i>
-								<input type="password" name="password" placeholder="再次输入密码">
+								<input type="password" name="password2" placeholder="再次输入密码">
 							</div>
 							<div class="input-field">
 								<input type="submit" value="注册">
@@ -163,6 +174,83 @@
 			</div>
 		</div>
 	</main>
+
+
+	<script>
+		function $(selector){
+      return document.querySelector(selector)
+    }
+    function $$(selector){
+      return document.querySelectorAll(selector)
+    }
+
+    $('header .login').onclick = function(e){
+      e.stopPropagation()
+      if($('.flip-modal').classList.contains('register')){
+        $('.flip-modal').classList.remove('register')
+        $('.flip-modal').classList.add('login') 
+      }
+      $('.flip-modal').style.display = 'block'
+    }
+
+    $('.flip-modal').addEventListener('click', function(e){
+      e.stopPropagation()
+      if(e.target.classList.contains('login')){
+        $('.flip-modal').classList.remove('register')
+        $('.flip-modal').classList.add('login') 
+      }
+      if(e.target.classList.contains('register')){
+        $('.flip-modal').classList.add('register')
+        $('.flip-modal').classList.remove('login') 
+      }
+      if(e.target.classList.contains('close')){
+        $('.flip-modal').style.display = 'none'
+      }
+      console.log(e.target)
+      console.log(this)
+      window.target = e.target
+      
+    })
+
+    document.addEventListener('click', function(){
+      $('.flip-modal').style.display = 'none'
+    })
+
+    $('.modal-login form').addEventListener('submit', function(e){
+      e.preventDefault()
+      if(!/^\w{3,8}$/.test($('.modal-login input[name=username]').value)){
+        $('.modal-login .errormsg').innerText = '用户名需输入3-8个字符，包括字母数字下划线'
+        return false
+      }
+      if(!/^\w{6,10}$/.test($('.modal-login input[name=password]').value)){
+        $('.modal-login .errormsg').innerText = '密码需输入6-10个字符，包括字母数字下划线'
+        return false
+      }
+      this.submit()      
+    })
+
+    $('.modal-register form').addEventListener('submit', function(e){
+      e.preventDefault()
+      if(!/^\w{3,8}$/.test($('.modal-register input[name=username]').value)){
+        $('.modal-register .errormsg').innerText = '用户名需输入3-8个字符，包括字母数字下划线'
+        return false
+      }
+      if(/^inner$|^wang$/.test($('.modal-register input[name=username]').value)){
+        $('.modal-register .errormsg').innerText = '用户名已存在'
+        return false
+      }
+      if(!/^\w{6,10}$/.test($('.modal-register input[name=password]').value)){
+        $('.modal-register .errormsg').innerText = '密码需输入6-10个字符，包括字母数字下划线'
+        return false
+      }
+      if($('.modal-register input[name=password]').value !== $('.modal-register input[name=password2]').value){
+        $('.modal-register .errormsg').innerText = '两次输入的密码不一致'
+        return false
+      }
+      this.submit()      
+    })
+
+	</script>
 </body>
 </html>
 
